@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cytology Viewer Pro - Slide Index</title>
+    <style>
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #0052a3;
+            --primary-light: #3384d6;
+            --secondary: #00c853;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --background: #0a0e1a;
+            --surface: #151b2e;
+            --surface-light: #1e2638;
+            --surface-hover: #262d42;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b8cc;
+            --text-disabled: #6b7485;
+            --border: #2a3548;
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--surface) 0%, var(--surface-light) 100%);
+            border-bottom: 2px solid var(--border);
+            padding: 24px 40px;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .logo-text p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-light);
+            font-family: 'Courier New', monospace;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(0, 200, 83, 0.2);
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        .indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .controls-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .search-section {
+            flex: 1;
+            max-width: 500px;
+        }
+
+        .search-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-disabled);
+            font-size: 16px;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        select {
+            padding: 10px 14px;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 150px;
+        }
+
+        select:hover {
+            border-color: var(--primary);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+        }
+
+        .view-btn {
+            padding: 10px 16px;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-btn:hover {
+            border-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .view-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .slide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .slide-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .slide-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 102, 204, 0.2);
+            border-color: var(--primary);
+        }
+
+        .slide-thumbnail {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--background) 0%, var(--surface-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-disabled);
+            font-size: 13px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .slide-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(0, 200, 83, 0.9);
+            color: white;
+        }
+
+        .slide-status.processing {
+            background: rgba(255, 152, 0, 0.9);
+        }
+
+        .slide-info {
+            padding: 16px;
+        }
+
+        .slide-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .slide-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .meta-label {
+            color: var(--text-secondary);
+        }
+
+        .meta-value {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+        }
+
+        .slide-actions {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: var(--primary);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .action-btn.secondary {
+            background: var(--surface-light);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .action-btn.secondary:hover {
+            background: var(--surface-hover);
+            border-color: var(--primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 32px;
+            color: var(--text-disabled);
+            font-size: 12px;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">CV</div>
+                <div class="logo-text">
+                    <h1>Cytology Viewer Pro</h1>
+                    <p>cybo.co.jp - Medical Imaging System</p>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="total-slides">0</div>
+                    <div class="stat-label">Total Slides</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="ready-slides">0</div>
+                    <div class="stat-label">Ready</div>
+                </div>
+                <div class="status-badge">
+                    <div class="indicator-dot"></div>
+                    <span>System Online</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="controls-bar">
+            <div class="search-section">
+                <div class="search-label">Search Slides</div>
+                <div class="search-box">
+                    <span class="search-icon">&#128269;</span>
+                    <input type="text" id="search-input" placeholder="Search by slide name, date, or ID...">
+                </div>
+            </div>
+            <div class="filter-section">
+                <div class="filter-group">
+                    <div class="filter-label">Sort By</div>
+                    <select id="sort-select">
+                        <option value="date-desc">Newest First</option>
+                        <option value="date-asc">Oldest First</option>
+                        <option value="name-asc">Name A-Z</option>
+                        <option value="name-desc">Name Z-A</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <div class="filter-label">Status</div>
+                    <select id="status-select">
+                        <option value="all">All Slides</option>
+                        <option value="ready">Ready</option>
+                        <option value="processing">Processing</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <div class="filter-label">View</div>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid">Grid</button>
+                        <button class="view-btn" data-view="list">List</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide-grid" id="slide-grid">
+            <!-- Slides will be populated here -->
+        </div>
+
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="empty-state-icon">📁</div>
+            <h3>No slides found</h3>
+            <p>Try adjusting your search or filters</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        cybo.co.jp - Cytology Viewer Pro - Professional Medical Imaging System
+    </div>
+
+    <script>
+        // Mock slide data
+        const slides = [
+            {
+                id: 'SLIDE-2025-001',
+                name: 'Patient-A-Cervical-01',
+                date: '2025-11-08T10:30:00Z',
+                layers: 40,
+                width: 10000,
+                height: 10000,
+                status: 'ready',
+                size: '2.4 GB'
+            },
+            {
+                id: 'SLIDE-2025-002',
+                name: 'Patient-B-Thyroid-01',
+                date: '2025-11-08T09:15:00Z',
+                layers: 40,
+                width: 12000,
+                height: 12000,
+                status: 'ready',
+                size: '3.1 GB'
+            },
+            {
+                id: 'SLIDE-2025-003',
+                name: 'Patient-C-Lung-02',
+                date: '2025-11-07T16:45:00Z',
+                layers: 40,
+                width: 9500,
+                height: 9500,
+                status: 'ready',
+                size: '2.2 GB'
+            },
+            {
+                id: 'SLIDE-2025-004',
+                name: 'Patient-D-Breast-01',
+                date: '2025-11-07T14:20:00Z',
+                layers: 40,
+                width: 11000,
+                height: 11000,
+                status: 'ready',
+                size: '2.8 GB'
+            },
+            {
+                id: 'SLIDE-2025-005',
+                name: 'Patient-E-Cervical-03',
+                date: '2025-11-06T11:30:00Z',
+                layers: 40,
+                width: 10500,
+                height: 10500,
+                status: 'ready',
+                size: '2.6 GB'
+            },
+            {
+                id: 'SLIDE-2025-006',
+                name: 'Patient-F-Thyroid-02',
+                date: '2025-11-06T08:00:00Z',
+                layers: 40,
+                width: 10000,
+                height: 10000,
+                status: 'processing',
+                size: '2.4 GB'
+            },
+            {
+                id: 'SLIDE-2025-007',
+                name: 'Patient-G-Lung-01',
+                date: '2025-11-05T15:30:00Z',
+                layers: 40,
+                width: 9800,
+                height: 9800,
+                status: 'ready',
+                size: '2.3 GB'
+            },
+            {
+                id: 'SLIDE-2025-008',
+                name: 'Patient-H-Cervical-02',
+                date: '2025-11-05T13:10:00Z',
+                layers: 40,
+                width: 10200,
+                height: 10200,
+                status: 'ready',
+                size: '2.5 GB'
+            }
+        ];
+
+        let currentSlides = [...slides];
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function renderSlides() {
+            const grid = document.getElementById('slide-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            if (currentSlides.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            grid.innerHTML = currentSlides.map(slide => `
+                <div class="slide-card" onclick="openSlide('${slide.id}')">
+                    <div class="slide-thumbnail">
+                        <span>Slide Preview</span>
+                        <div class="slide-status ${slide.status}">${slide.status}</div>
+                    </div>
+                    <div class="slide-info">
+                        <div class="slide-name">${slide.name}</div>
+                        <div class="slide-meta">
+                            <div class="meta-row">
+                                <span class="meta-label">ID:</span>
+                                <span class="meta-value">${slide.id}</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Date:</span>
+                                <span class="meta-value">${formatDate(slide.date)}</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Dimensions:</span>
+                                <span class="meta-value">${slide.width} x ${slide.height}</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Layers:</span>
+                                <span class="meta-value">${slide.layers}</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Size:</span>
+                                <span class="meta-value">${slide.size}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slide-actions">
+                        <button class="action-btn" onclick="event.stopPropagation(); openSlide('${slide.id}')">
+                            Open Viewer
+                        </button>
+                        <button class="action-btn secondary" onclick="event.stopPropagation(); showInfo('${slide.id}')">
+                            Info
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update stats
+            document.getElementById('total-slides').textContent = slides.length;
+            document.getElementById('ready-slides').textContent =
+                slides.filter(s => s.status === 'ready').length;
+        }
+
+        function openSlide(slideId) {
+            // Check if logged in
+            if (sessionStorage.getItem('authenticated') !== 'true') {
+                window.location.href = '/';
+                return;
+            }
+            console.log('Opening slide:', slideId);
+            window.location.href = `viewer.html?slide=${slideId}`;
+        }
+
+        function showInfo(slideId) {
+            const slide = slides.find(s => s.id === slideId);
+            alert(`Slide Information:\n\nID: ${slide.id}\nName: ${slide.name}\nDate: ${formatDate(slide.date)}\nDimensions: ${slide.width}x${slide.height}\nLayers: ${slide.layers}\nSize: ${slide.size}\nStatus: ${slide.status}`);
+        }
+
+        function filterSlides() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('status-select').value;
+            const sortBy = document.getElementById('sort-select').value;
+
+            // Filter
+            currentSlides = slides.filter(slide => {
+                const matchesSearch = slide.name.toLowerCase().includes(searchTerm) ||
+                                    slide.id.toLowerCase().includes(searchTerm) ||
+                                    formatDate(slide.date).toLowerCase().includes(searchTerm);
+                const matchesStatus = statusFilter === 'all' || slide.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            // Sort
+            currentSlides.sort((a, b) => {
+                switch(sortBy) {
+                    case 'date-desc':
+                        return new Date(b.date) - new Date(a.date);
+                    case 'date-asc':
+                        return new Date(a.date) - new Date(b.date);
+                    case 'name-asc':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                    default:
+                        return 0;
+                }
+            });
+
+            renderSlides();
+        }
+
+        // Event listeners
+        document.getElementById('search-input').addEventListener('input', filterSlides);
+        document.getElementById('sort-select').addEventListener('change', filterSlides);
+        document.getElementById('status-select').addEventListener('change', filterSlides);
+
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                // View toggle functionality can be implemented here
+            });
+        });
+
+        // Check authentication
+        if (sessionStorage.getItem('authenticated') !== 'true') {
+            window.location.href = '/';
+        }
+
+        // Initial render
+        renderSlides();
+    </script>
+</body>
+</html>

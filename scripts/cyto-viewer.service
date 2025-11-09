@@ -1,0 +1,38 @@
+[Unit]
+Description=Cytology Viewer Pro - High Performance Medical Imaging System
+After=network.target
+
+[Service]
+Type=simple
+User=cytoviewer
+Group=cytoviewer
+WorkingDirectory=/opt/cyto-viewer
+
+# Environment configuration
+EnvironmentFile=/etc/cyto-viewer/config.env
+
+# Executable
+ExecStart=/usr/local/bin/cyto-viewer
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Resource limits
+LimitNOFILE=65536
+MemoryLimit=16G
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/data/slides /data/temp
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cyto-viewer
+
+[Install]
+WantedBy=multi-user.target

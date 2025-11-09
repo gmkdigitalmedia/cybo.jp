@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cytology Viewer Pro - cybo.co.jp</title>
+    <style>
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #0052a3;
+            --primary-light: #3384d6;
+            --secondary: #00c853;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --background: #0a0e1a;
+            --surface: #151b2e;
+            --surface-light: #1e2638;
+            --surface-hover: #262d42;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b8cc;
+            --text-disabled: #6b7485;
+            --border: #2a3548;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --overlay: rgba(10, 14, 26, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Main Layout */
+        .app-container {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            grid-template-rows: 60px 1fr 80px;
+            height: 100vh;
+            gap: 0;
+        }
+
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--surface) 0%, var(--surface-light) 100%);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: 0 2px 8px var(--shadow);
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .logo-text h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .logo-text p {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: var(--surface-light);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Sidebar - Slide Library */
+        .sidebar {
+            grid-row: 2 / 4;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-header h2 {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--background);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-disabled);
+        }
+
+        .slide-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .slide-item {
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .slide-item:hover {
+            background: var(--surface-hover);
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .slide-item.active {
+            background: var(--primary);
+            border-color: var(--primary-light);
+        }
+
+        .slide-thumbnail {
+            width: 100%;
+            height: 120px;
+            background: var(--background);
+            border-radius: 4px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-disabled);
+            font-size: 11px;
+        }
+
+        .slide-info h3 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .slide-info p {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Viewer */
+        .viewer-container {
+            grid-row: 2;
+            position: relative;
+            background: #000;
+            overflow: hidden;
+        }
+
+        #webgl-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+        #webgl-canvas:active {
+            cursor: grabbing;
+        }
+
+        .viewer-overlay {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .tool-button {
+            min-width: 50px;
+            height: 40px;
+            padding: 0 12px;
+            background: var(--overlay);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-primary);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .tool-button:hover {
+            background: var(--surface-light);
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .tool-button.active {
+            background: var(--primary);
+            border-color: var(--primary-light);
+        }
+
+        /* Controls Panel */
+        .controls-panel {
+            grid-row: 2 / 4;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .panel-section {
+            border-bottom: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        .panel-section h3 {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .control-value {
+            font-weight: 600;
+            color: var(--primary-light);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, var(--primary) 0%, var(--primary) 50%, var(--surface-light) 50%, var(--surface-light) 100%);
+            outline: none;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        input[type="range"]:hover {
+            height: 8px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px var(--shadow);
+            border: 2px solid var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px var(--shadow);
+            border: 2px solid var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: var(--text-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface-light);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-hover);
+            border-color: var(--primary);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn + .btn {
+            margin-top: 8px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .quick-actions .btn {
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            grid-column: 2;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+        }
+
+        .stat-group {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            color: var(--primary-light);
+        }
+
+        .performance-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Loading States */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--overlay);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--surface-light);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: absolute;
+            background: var(--overlay);
+            backdrop-filter: blur(10px);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10000;
+            border: 1px solid var(--border);
+        }
+
+        /* Minimap */
+        .minimap {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            width: 200px;
+            height: 150px;
+            background: var(--overlay);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .minimap-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .minimap-viewport {
+            position: absolute;
+            border: 2px solid var(--primary);
+            pointer-events: none;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--surface);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--surface-light);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--surface-hover);
+        }
+
+        /* Annotations */
+        .annotation {
+            position: absolute;
+            border: 2px solid var(--warning);
+            border-radius: 4px;
+            pointer-events: all;
+            cursor: move;
+        }
+
+        .annotation-label {
+            position: absolute;
+            top: -24px;
+            left: 0;
+            background: var(--warning);
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .app-container {
+                grid-template-columns: 280px 1fr 320px;
+            }
+        }
+
+        /* Color Palette Display */
+        .color-palette {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
+        }
+
+        .color-swatch.active {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 12px var(--primary);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+        }
+
+        .status-badge.online {
+            background: rgba(0, 200, 83, 0.2);
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo" style="cursor: pointer;" onclick="window.location.href='/slides.html'">
+                <div class="logo-icon">CV</div>
+                <div class="logo-text">
+                    <h1>Cytology Viewer Pro</h1>
+                    <p>cybo.co.jp - Medical Imaging System</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="window.location.href='/slides.html'" style="padding: 8px 16px; margin-right: 12px;">
+                    <span>← Back to Index</span>
+                </button>
+                <div class="status-badge online">
+                    <div class="indicator-dot"></div>
+                    <span>System Online</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">DR</div>
+                    <span style="font-size: 13px; font-weight: 500;">Dr. User</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar - Slide Library -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Slide Library</h2>
+                <div class="search-box">
+                    <span class="search-icon">&#128269;</span>
+                    <input type="text" placeholder="Search slides..." id="slide-search">
+                </div>
+            </div>
+            <div class="slide-list" id="slide-list">
+                <div class="slide-item active" data-slide-id="sample-001">
+                    <div class="slide-thumbnail">Sample Image</div>
+                    <div class="slide-info">
+                        <h3>Sample-001</h3>
+                        <p>Created: 2025-11-08 | 40 layers</p>
+                    </div>
+                </div>
+                <div class="slide-item" data-slide-id="sample-002">
+                    <div class="slide-thumbnail">Sample Image</div>
+                    <div class="slide-info">
+                        <h3>Sample-002</h3>
+                        <p>Created: 2025-11-07 | 40 layers</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Viewer -->
+        <div class="viewer-container">
+            <canvas id="webgl-canvas"></canvas>
+
+            <div class="viewer-overlay">
+                <div class="tool-button" id="tool-pan" title="Pan (P)">PAN</div>
+                <div class="tool-button" id="tool-annotate" title="Annotate (A)">ANN</div>
+                <div class="tool-button" id="tool-measure" title="Measure (M)">MSR</div>
+                <div class="tool-button" id="tool-snapshot" title="Snapshot (S)">CAP</div>
+            </div>
+
+            <div class="minimap">
+                <canvas class="minimap-canvas" id="minimap-canvas"></canvas>
+                <div class="minimap-viewport" id="minimap-viewport"></div>
+            </div>
+
+            <div class="loading-overlay" id="loading-overlay">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading slide data...</div>
+            </div>
+        </div>
+
+        <!-- Controls Panel -->
+        <aside class="controls-panel">
+            <div class="panel-section">
+                <h3>Focus Control</h3>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Focus Layer</span>
+                        <span class="control-value" id="layer-value">5</span>
+                    </div>
+                    <input type="range" id="focus-layer" min="0" max="39" value="5" step="1">
+                    <div class="quick-actions" style="margin-top: 12px;">
+                        <button class="btn btn-secondary" onclick="setLayer(0)">Surface</button>
+                        <button class="btn btn-secondary" onclick="setLayer(10)">Layer 10</button>
+                        <button class="btn btn-secondary" onclick="setLayer(20)">Layer 20</button>
+                        <button class="btn btn-secondary" onclick="setLayer(39)">Deep</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Image Adjustments</h3>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Brightness</span>
+                        <span class="control-value" id="brightness-value">100%</span>
+                    </div>
+                    <input type="range" id="brightness" min="50" max="200" value="100" step="5">
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Contrast</span>
+                        <span class="control-value" id="contrast-value">100%</span>
+                    </div>
+                    <input type="range" id="contrast" min="50" max="200" value="100" step="5">
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Sharpness</span>
+                        <span class="control-value" id="sharpness-value">0%</span>
+                    </div>
+                    <input type="range" id="sharpness" min="0" max="100" value="0" step="5">
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Saturation</span>
+                        <span class="control-value" id="saturation-value">100%</span>
+                    </div>
+                    <input type="range" id="saturation" min="0" max="200" value="100" step="5">
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>View Controls</h3>
+                <button class="btn btn-primary" id="reset-view">
+                    <span>Reset View</span>
+                </button>
+                <button class="btn btn-secondary" id="fullscreen">
+                    <span>Fullscreen</span>
+                </button>
+                <button class="btn btn-secondary" id="toggle-grid">
+                    <span>Toggle Grid</span>
+                </button>
+                <button class="btn btn-secondary" id="export-view">
+                    <span>Export View</span>
+                </button>
+            </div>
+
+            <div class="panel-section">
+                <h3>Presets</h3>
+                <button class="btn btn-secondary" onclick="applyPreset('default')">Default View</button>
+                <button class="btn btn-secondary" onclick="applyPreset('high-contrast')">High Contrast</button>
+                <button class="btn btn-secondary" onclick="applyPreset('enhanced')">Enhanced Detail</button>
+            </div>
+        </aside>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-group">
+                <div class="stat-item">
+                    <div class="stat-label">FPS</div>
+                    <div class="stat-value" id="fps">60</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Tiles Loaded</div>
+                    <div class="stat-value" id="tile-count">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Zoom</div>
+                    <div class="stat-value" id="zoom-level">1.00x</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Position</div>
+                    <div class="stat-value" id="position">0, 0</div>
+                </div>
+            </div>
+            <div class="performance-indicator">
+                <div class="indicator-dot"></div>
+                <span style="font-size: 12px; color: var(--text-secondary);">GPU Accelerated</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced WebGL Cytology Viewer with advanced features
+        class CytologyViewerPro {
+            constructor(canvas, slideId) {
+                this.canvas = canvas;
+                this.slideId = slideId;
+
+                // Initialize WebGL2 with high-performance settings
+                this.gl = canvas.getContext('webgl2', {
+                    alpha: false,
+                    antialias: true,
+                    depth: false,
+                    premultipliedAlpha: true,
+                    preserveDrawingBuffer: false,
+                    powerPreference: 'high-performance',
+                    desynchronized: true
+                });
+
+                if (!this.gl) {
+                    this.fallbackToCanvas();
+                    return;
+                }
+
+                // Camera state
+                this.camera = { x: 0, y: 0, zoom: 1.0 };
+
+                // Tile management
+                this.tileCache = new Map();
+                this.tilePriority = new Map();
+                this.tileSize = 512;
+                this.maxZoom = 64;
+                this.minZoom = 0.1;
+                this.maxCacheSize = 200; // tiles
+
+                // Image parameters
+                this.params = {
+                    focusLayer: 5,
+                    brightness: 1.0,
+                    contrast: 1.0,
+                    sharpness: 0.0,
+                    saturation: 1.0
+                };
+
+                // Performance tracking
+                this.stats = {
+                    fps: 0,
+                    frameCount: 0,
+                    lastFrameTime: performance.now(),
+                    tileLoadTime: 0,
+                    drawCalls: 0
+                };
+
+                // Loading state
+                this.isLoading = false;
+                this.loadingTiles = new Set();
+
+                // Tools
+                this.currentTool = 'pan';
+                this.annotations = [];
+
+                this.init();
+                this.setupInputHandlers();
+                this.setupResizeObserver();
+                this.startRenderLoop();
+
+                console.log('Cytology Viewer Pro initialized');
+            }
+
+            init() {
+                const gl = this.gl;
+
+                // Vertex shader
+                const vertexShaderSource = `#version 300 es
+                    in vec2 a_position;
+                    in vec2 a_texCoord;
+
+                    uniform mat3 u_matrix;
+
+                    out vec2 v_texCoord;
+
+                    void main() {
+                        vec2 position = (u_matrix * vec3(a_position, 1)).xy;
+                        gl_Position = vec4(position, 0, 1);
+                        v_texCoord = a_texCoord;
+                    }
+                `;
+
+                // Enhanced fragment shader with full color correction
+                const fragmentShaderSource = `#version 300 es
+                    precision highp float;
+
+                    in vec2 v_texCoord;
+                    out vec4 fragColor;
+
+                    uniform sampler2D u_texture;
+                    uniform float u_brightness;
+                    uniform float u_contrast;
+                    uniform float u_sharpness;
+                    uniform float u_saturation;
+                    uniform vec2 u_texelSize;
+
+                    vec3 rgb2hsv(vec3 c) {
+                        vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+                        vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+                        vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+                        float d = q.x - min(q.w, q.y);
+                        float e = 1.0e-10;
+                        return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+                    }
+
+                    vec3 hsv2rgb(vec3 c) {
+                        vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+                        vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+                        return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+                    }
+
+                    void main() {
+                        vec4 color = texture(u_texture, v_texCoord);
+
+                        // Apply sharpness using unsharp mask
+                        if (u_sharpness > 0.01) {
+                            vec4 blur = vec4(0.0);
+                            float kernel[9] = float[](1.0, 2.0, 1.0, 2.0, 4.0, 2.0, 1.0, 2.0, 1.0);
+                            int idx = 0;
+                            for(int y = -1; y <= 1; y++) {
+                                for(int x = -1; x <= 1; x++) {
+                                    vec2 offset = vec2(float(x), float(y)) * u_texelSize;
+                                    blur += texture(u_texture, v_texCoord + offset) * kernel[idx++];
+                                }
+                            }
+                            blur /= 16.0;
+                            color = color + (color - blur) * u_sharpness;
+                        }
+
+                        // Apply brightness and contrast
+                        color.rgb = (color.rgb - 0.5) * u_contrast + 0.5;
+                        color.rgb *= u_brightness;
+
+                        // Apply saturation
+                        if (abs(u_saturation - 1.0) > 0.01) {
+                            vec3 hsv = rgb2hsv(color.rgb);
+                            hsv.y *= u_saturation;
+                            color.rgb = hsv2rgb(hsv);
+                        }
+
+                        fragColor = clamp(color, 0.0, 1.0);
+                    }
+                `;
+
+                this.program = this.createProgram(vertexShaderSource, fragmentShaderSource);
+                if (!this.program) {
+                    console.error('Failed to create shader program');
+                    return;
+                }
+
+                gl.useProgram(this.program);
+
+                // Get uniform locations
+                this.uniforms = {
+                    matrix: gl.getUniformLocation(this.program, 'u_matrix'),
+                    texture: gl.getUniformLocation(this.program, 'u_texture'),
+                    brightness: gl.getUniformLocation(this.program, 'u_brightness'),
+                    contrast: gl.getUniformLocation(this.program, 'u_contrast'),
+                    sharpness: gl.getUniformLocation(this.program, 'u_sharpness'),
+                    saturation: gl.getUniformLocation(this.program, 'u_saturation'),
+                    texelSize: gl.getUniformLocation(this.program, 'u_texelSize')
+                };
+
+                // Create quad geometry
+                this.createGeometry();
+
+                // Enable blending for smooth rendering
+                gl.enable(gl.BLEND);
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            }
+
+            createProgram(vertexSource, fragmentSource) {
+                const gl = this.gl;
+                const vertexShader = this.compileShader(gl.VERTEX_SHADER, vertexSource);
+                const fragmentShader = this.compileShader(gl.FRAGMENT_SHADER, fragmentSource);
+
+                if (!vertexShader || !fragmentShader) return null;
+
+                const program = gl.createProgram();
+                gl.attachShader(program, vertexShader);
+                gl.attachShader(program, fragmentShader);
+                gl.linkProgram(program);
+
+                if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                    console.error('Program link error:', gl.getProgramInfoLog(program));
+                    return null;
+                }
+
+                return program;
+            }
+
+            compileShader(type, source) {
+                const gl = this.gl;
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+                    gl.deleteShader(shader);
+                    return null;
+                }
+
+                return shader;
+            }
+
+            createGeometry() {
+                const gl = this.gl;
+
+                const positions = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
+                const texCoords = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
+
+                this.positionBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+                this.texCoordBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
+
+                const positionLoc = gl.getAttribLocation(this.program, 'a_position');
+                const texCoordLoc = gl.getAttribLocation(this.program, 'a_texCoord');
+
+                gl.enableVertexAttribArray(positionLoc);
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+                gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
+
+                gl.enableVertexAttribArray(texCoordLoc);
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
+                gl.vertexAttribPointer(texCoordLoc, 2, gl.FLOAT, false, 0, 0);
+            }
+
+            setupInputHandlers() {
+                let isDragging = false;
+                let lastX = 0, lastY = 0;
+
+                // Mouse events
+                this.canvas.addEventListener('mousedown', (e) => {
+                    if (this.currentTool === 'pan') {
+                        isDragging = true;
+                        lastX = e.clientX;
+                        lastY = e.clientY;
+                    }
+                });
+
+                this.canvas.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+
+                    const dx = e.clientX - lastX;
+                    const dy = e.clientY - lastY;
+
+                    this.camera.x -= dx / this.camera.zoom;
+                    this.camera.y -= dy / this.camera.zoom;
+
+                    lastX = e.clientX;
+                    lastY = e.clientY;
+
+                    this.updatePositionDisplay();
+                });
+
+                this.canvas.addEventListener('mouseup', () => {
+                    isDragging = false;
+                });
+
+                // Wheel zoom
+                this.canvas.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+
+                    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+                    const newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.camera.zoom * zoomFactor));
+
+                    if (newZoom !== this.camera.zoom) {
+                        const rect = this.canvas.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+
+                        const worldX = (x - this.canvas.width / 2) / this.camera.zoom + this.camera.x;
+                        const worldY = (y - this.canvas.height / 2) / this.camera.zoom + this.camera.y;
+
+                        this.camera.zoom = newZoom;
+
+                        this.camera.x = worldX - (x - this.canvas.width / 2) / this.camera.zoom;
+                        this.camera.y = worldY - (y - this.canvas.height / 2) / this.camera.zoom;
+
+                        this.updateZoomDisplay();
+                    }
+                }, { passive: false });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key.toLowerCase()) {
+                        case 'p': this.setTool('pan'); break;
+                        case 'a': this.setTool('annotate'); break;
+                        case 'm': this.setTool('measure'); break;
+                        case 'r': this.resetView(); break;
+                        case 'f': this.toggleFullscreen(); break;
+                        case 'escape': window.location.href = '/slides.html'; break;
+                    }
+                });
+            }
+
+            setupResizeObserver() {
+                const resizeObserver = new ResizeObserver(() => {
+                    this.resizeCanvas();
+                });
+                resizeObserver.observe(this.canvas);
+                this.resizeCanvas();
+            }
+
+            resizeCanvas() {
+                const displayWidth = this.canvas.clientWidth;
+                const displayHeight = this.canvas.clientHeight;
+
+                if (this.canvas.width !== displayWidth || this.canvas.height !== displayHeight) {
+                    this.canvas.width = displayWidth;
+                    this.canvas.height = displayHeight;
+                    this.gl.viewport(0, 0, displayWidth, displayHeight);
+                }
+            }
+
+            async loadTile(x, y, zoom) {
+                const key = `${this.slideId}:${this.params.focusLayer}:${x}:${y}:${Math.floor(zoom)}`;
+
+                if (this.tileCache.has(key)) {
+                    this.tilePriority.set(key, Date.now());
+                    return this.tileCache.get(key);
+                }
+
+                if (this.loadingTiles.has(key)) {
+                    return null;
+                }
+
+                this.loadingTiles.add(key);
+
+                try {
+                    const response = await fetch(
+                        `/api/tiles/${this.slideId}?layer=${this.params.focusLayer}&x=${x}&y=${y}&z=${Math.floor(zoom)}`
+                    );
+
+                    if (!response.ok) {
+                        this.loadingTiles.delete(key);
+                        return null;
+                    }
+
+                    const blob = await response.blob();
+                    const img = await createImageBitmap(blob);
+
+                    const texture = this.gl.createTexture();
+                    this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+                    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA,
+                                      this.gl.UNSIGNED_BYTE, img);
+                    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_LINEAR);
+                    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
+                    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+                    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+                    this.gl.generateMipmap(this.gl.TEXTURE_2D);
+
+                    this.tileCache.set(key, texture);
+                    this.tilePriority.set(key, Date.now());
+                    this.loadingTiles.delete(key);
+
+                    // Cache management
+                    if (this.tileCache.size > this.maxCacheSize) {
+                        this.evictOldTiles();
+                    }
+
+                    return texture;
+                } catch (error) {
+                    console.error('Failed to load tile:', key, error);
+                    this.loadingTiles.delete(key);
+                    return null;
+                }
+            }
+
+            evictOldTiles() {
+                const sorted = Array.from(this.tilePriority.entries())
+                    .sort((a, b) => a[1] - b[1]);
+
+                const toRemove = Math.floor(this.maxCacheSize * 0.2);
+                for (let i = 0; i < toRemove && i < sorted.length; i++) {
+                    const key = sorted[i][0];
+                    const texture = this.tileCache.get(key);
+                    if (texture) {
+                        this.gl.deleteTexture(texture);
+                    }
+                    this.tileCache.delete(key);
+                    this.tilePriority.delete(key);
+                }
+            }
+
+            startRenderLoop() {
+                const render = () => {
+                    this.updateStats();
+                    this.draw();
+                    requestAnimationFrame(render);
+                };
+                requestAnimationFrame(render);
+            }
+
+            updateStats() {
+                const now = performance.now();
+                this.stats.frameCount++;
+
+                if (now - this.stats.lastFrameTime >= 1000) {
+                    this.stats.fps = this.stats.frameCount;
+                    this.stats.frameCount = 0;
+                    this.stats.lastFrameTime = now;
+
+                    document.getElementById('fps').textContent = this.stats.fps;
+                    document.getElementById('tile-count').textContent = this.tileCache.size;
+                }
+            }
+
+            draw() {
+                const gl = this.gl;
+
+                gl.clearColor(0.05, 0.05, 0.1, 1.0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+
+                const visibleTiles = this.calculateVisibleTiles();
+
+                // Draw tiles
+                visibleTiles.forEach(tile => {
+                    const key = `${this.slideId}:${this.params.focusLayer}:${tile.x}:${tile.y}:${Math.floor(tile.zoom)}`;
+                    let texture = this.tileCache.get(key);
+
+                    if (!texture) {
+                        // Async load
+                        this.loadTile(tile.x, tile.y, tile.zoom);
+                        return;
+                    }
+
+                    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+                    // Set uniforms
+                    gl.uniform1f(this.uniforms.brightness, this.params.brightness);
+                    gl.uniform1f(this.uniforms.contrast, this.params.contrast);
+                    gl.uniform1f(this.uniforms.sharpness, this.params.sharpness);
+                    gl.uniform1f(this.uniforms.saturation, this.params.saturation);
+                    gl.uniform2f(this.uniforms.texelSize, 1/this.tileSize, 1/this.tileSize);
+
+                    const matrix = this.calculateTileMatrix(tile);
+                    gl.uniformMatrix3fv(this.uniforms.matrix, false, matrix);
+
+                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                    this.stats.drawCalls++;
+                });
+            }
+
+            calculateVisibleTiles() {
+                const tiles = [];
+                const padding = 1; // Load tiles slightly outside viewport
+
+                const startX = Math.floor(-this.camera.x / this.tileSize) - padding;
+                const startY = Math.floor(-this.camera.y / this.tileSize) - padding;
+                const endX = Math.ceil((this.canvas.width / this.camera.zoom - this.camera.x) / this.tileSize) + padding;
+                const endY = Math.ceil((this.canvas.height / this.camera.zoom - this.camera.y) / this.tileSize) + padding;
+
+                for (let y = startY; y <= endY; y++) {
+                    for (let x = startX; x <= endX; x++) {
+                        tiles.push({ x, y, zoom: this.camera.zoom });
+                    }
+                }
+
+                return tiles;
+            }
+
+            calculateTileMatrix(tile) {
+                const tileWorldX = tile.x * this.tileSize;
+                const tileWorldY = tile.y * this.tileSize;
+
+                const screenX = (tileWorldX - this.camera.x) * this.camera.zoom;
+                const screenY = (tileWorldY - this.camera.y) * this.camera.zoom;
+
+                const scaleX = (this.tileSize * this.camera.zoom) / this.canvas.width * 2;
+                const scaleY = (this.tileSize * this.camera.zoom) / this.canvas.height * 2;
+
+                const tx = (screenX / this.canvas.width * 2) - 1;
+                const ty = 1 - (screenY / this.canvas.height * 2);
+
+                return new Float32Array([
+                    scaleX, 0, 0,
+                    0, -scaleY, 0,
+                    tx, ty, 1
+                ]);
+            }
+
+            // Public API
+            setFocusLayer(layer) {
+                this.params.focusLayer = Math.max(0, Math.min(39, layer));
+                this.tileCache.clear();
+                this.tilePriority.clear();
+            }
+
+            setBrightness(value) { this.params.brightness = value / 100; }
+            setContrast(value) { this.params.contrast = value / 100; }
+            setSharpness(value) { this.params.sharpness = value / 100; }
+            setSaturation(value) { this.params.saturation = value / 100; }
+
+            resetView() {
+                this.camera = { x: 0, y: 0, zoom: 1.0 };
+                this.updateZoomDisplay();
+                this.updatePositionDisplay();
+            }
+
+            setTool(tool) {
+                this.currentTool = tool;
+                document.querySelectorAll('.tool-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.getElementById(`tool-${tool}`)?.classList.add('active');
+            }
+
+            toggleFullscreen() {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    document.documentElement.requestFullscreen();
+                }
+            }
+
+            updateZoomDisplay() {
+                document.getElementById('zoom-level').textContent = this.camera.zoom.toFixed(2) + 'x';
+            }
+
+            updatePositionDisplay() {
+                document.getElementById('position').textContent =
+                    `${Math.round(this.camera.x)}, ${Math.round(this.camera.y)}`;
+            }
+
+            fallbackToCanvas() {
+                console.warn('WebGL2 not supported, using canvas fallback');
+                document.getElementById('webgl-canvas').style.background =
+                    'linear-gradient(135deg, #1e2638 0%, #0a0e1a 100%)';
+            }
+        }
+
+        // Initialize viewer
+        let viewer;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication
+            if (sessionStorage.getItem('authenticated') !== 'true') {
+                window.location.href = '/';
+                return;
+            }
+
+            const canvas = document.getElementById('webgl-canvas');
+            viewer = new CytologyViewerPro(canvas, 'sample-001');
+
+            // Setup UI controls
+            setupControls();
+            setupSlideLibrary();
+
+            // Hide loading overlay
+            setTimeout(() => {
+                document.getElementById('loading-overlay').classList.remove('active');
+            }, 500);
+        });
+
+        function setupControls() {
+            // Focus layer
+            const layerSlider = document.getElementById('focus-layer');
+            layerSlider.addEventListener('input', (e) => {
+                const value = parseInt(e.target.value);
+                viewer.setFocusLayer(value);
+                document.getElementById('layer-value').textContent = value;
+                updateSliderBackground(layerSlider);
+            });
+
+            // Image adjustments
+            const controls = [
+                { id: 'brightness', method: 'setBrightness', suffix: '%' },
+                { id: 'contrast', method: 'setContrast', suffix: '%' },
+                { id: 'sharpness', method: 'setSharpness', suffix: '%' },
+                { id: 'saturation', method: 'setSaturation', suffix: '%' }
+            ];
+
+            controls.forEach(ctrl => {
+                const slider = document.getElementById(ctrl.id);
+                slider.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    viewer[ctrl.method](value);
+                    document.getElementById(`${ctrl.id}-value`).textContent = value + ctrl.suffix;
+                    updateSliderBackground(slider);
+                });
+                updateSliderBackground(slider);
+            });
+
+            // Buttons
+            document.getElementById('reset-view').addEventListener('click', () => viewer.resetView());
+            document.getElementById('fullscreen').addEventListener('click', () => viewer.toggleFullscreen());
+
+            // Tools
+            document.getElementById('tool-pan').addEventListener('click', () => viewer.setTool('pan'));
+            document.getElementById('tool-annotate').addEventListener('click', () => viewer.setTool('annotate'));
+            document.getElementById('tool-measure').addEventListener('click', () => viewer.setTool('measure'));
+        }
+
+        function updateSliderBackground(slider) {
+            const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+            slider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${value}%, var(--surface-light) ${value}%, var(--surface-light) 100%)`;
+        }
+
+        function setupSlideLibrary() {
+            document.querySelectorAll('.slide-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.slide-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+
+                    const slideId = item.dataset.slideId;
+                    // Load new slide
+                    console.log('Loading slide:', slideId);
+                });
+            });
+        }
+
+        function setLayer(layer) {
+            document.getElementById('focus-layer').value = layer;
+            viewer.setFocusLayer(layer);
+            document.getElementById('layer-value').textContent = layer;
+            updateSliderBackground(document.getElementById('focus-layer'));
+        }
+
+        function applyPreset(preset) {
+            const presets = {
+                'default': { brightness: 100, contrast: 100, sharpness: 0, saturation: 100 },
+                'high-contrast': { brightness: 110, contrast: 140, sharpness: 30, saturation: 90 },
+                'enhanced': { brightness: 105, contrast: 120, sharpness: 50, saturation: 110 }
+            };
+
+            const p = presets[preset];
+            if (!p) return;
+
+            ['brightness', 'contrast', 'sharpness', 'saturation'].forEach(key => {
+                const slider = document.getElementById(key);
+                slider.value = p[key];
+                slider.dispatchEvent(new Event('input'));
+            });
+        }
+    </script>
+</body>
+</html>
